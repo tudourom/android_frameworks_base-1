@@ -547,6 +547,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     boolean mTranslucentDecorEnabled = true;
     boolean mUseTvRouting;
     int mBackKillTimeout;
+    int mCustomBackKillTimeout;
 
     int mDeviceHardwareKeys;
 
@@ -1000,6 +1001,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     UserHandle.USER_ALL);
             resolver.registerContentObserver(Settings.Secure.getUriFor(
                     Settings.Secure.WAKE_GESTURE_ENABLED), false, this,
+                    UserHandle.USER_ALL);
+             resolver.registerContentObserver(Settings.Secure.getUriFor(
+                    Settings.Secure.KILL_APP_LONGPRESS_TIMEOUT), false, this,
                     UserHandle.USER_ALL);
             resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.ACCELEROMETER_ROTATION), false, this,
@@ -2350,6 +2354,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     Settings.System.END_BUTTON_BEHAVIOR,
                     Settings.System.END_BUTTON_BEHAVIOR_DEFAULT,
                     UserHandle.USER_CURRENT);
+            mCustomBackKillTimeout = Settings.Secure.getIntForUser(resolver,
+                    Settings.Secure.KILL_APP_LONGPRESS_TIMEOUT, mBackKillTimeout, UserHandle.USER_CURRENT);
             mIncallPowerBehavior = Settings.Secure.getIntForUser(resolver,
                     Settings.Secure.INCALL_POWER_BUTTON_BEHAVIOR,
                     Settings.Secure.INCALL_POWER_BUTTON_BEHAVIOR_DEFAULT,
@@ -3931,7 +3937,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             if (unpinActivity(true) || CMSettings.Secure.getInt(mContext.getContentResolver(),
                     CMSettings.Secure.KILL_APP_LONGPRESS_BACK, 0) == 1) {
                 if (down && repeatCount == 0) {
-                    mHandler.postDelayed(mBackLongPress, mBackKillTimeout);
+                    mHandler.postDelayed(mBackLongPress, mCustomBackKillTimeout);
                 }
             }
         }
