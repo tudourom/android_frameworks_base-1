@@ -3709,6 +3709,12 @@ public final class Settings {
          */
         public static final String LISTVIEW_INTERPOLATOR = "listview_interpolator";
 
+	 /**
+          * whether to display SU icon in statusbar
+          * @hide
+          */
+        public static final String SHOW_SU_INDICATOR = "show_su_indicator";
+
         /**
          * I am the lolrus.
          * <p>
