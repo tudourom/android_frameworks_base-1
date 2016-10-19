@@ -3677,6 +3677,12 @@ public final class Settings {
         public static final String DISABLE_STK_DIALOG_AUTO_OPEN = "disable_stk_dialog_auto_open";
 
         /**
+         * Transparent qs shade
+         * @hide
+         */
+        public static final String QS_TRANSPARENT_SHADE = "qs_transparent_shade";
+
+        /**
          * I am the lolrus.
          * <p>
          * Nonzero values indicate that the user has a bukkit.
