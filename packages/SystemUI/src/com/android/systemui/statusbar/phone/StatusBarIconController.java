@@ -50,6 +50,7 @@ import com.android.systemui.statusbar.StatusBarIconView;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.tuner.TunerService.Tunable;
 import com.android.systemui.statusbar.policy.NetworkTraffic;
+import com.android.systemui.statusbar.widget.CarrierLabel;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -82,6 +83,7 @@ public class StatusBarIconController extends StatusBarIconList implements Tunabl
     private ClockController mClockController;
     private View mCenterClockLayout;
     private NetworkTraffic mNetworkTraffic;
+    private CarrierLabel mCarrierLabel;
 
     private int mIconSize;
     private int mIconHPadding;
@@ -144,6 +146,7 @@ public class StatusBarIconController extends StatusBarIconList implements Tunabl
         mDarkModeIconColorSingleTone = context.getColor(R.color.dark_mode_icon_color_single_tone);
         mLightModeIconColorSingleTone = context.getColor(R.color.light_mode_icon_color_single_tone);
         mHandler = new Handler();
+        mCarrierLabel = (CarrierLabel) statusBar.findViewById(R.id.keyguard_carrier_text);
         mClockController = new ClockController(statusBar, mNotificationIconAreaController, mHandler);
         mCenterClockLayout = statusBar.findViewById(R.id.center_clock_layout);
         loadDimens();
@@ -551,6 +554,7 @@ public class StatusBarIconController extends StatusBarIconList implements Tunabl
         mBatteryMeterView.setDarkIntensity(
                 isInArea(mTintArea, mBatteryMeterView) ? mDarkIntensity : 0);
         mNetworkTraffic.setTextColor(mIconTint);
+        mCarrierLabel.setTextColor(mIconTint);
         mClockController.setTextColor(mTintArea, mIconTint);
         mBatteryLevelView.setTextColor(getTint(mTintArea, mBatteryLevelView, mIconTint));
     }
