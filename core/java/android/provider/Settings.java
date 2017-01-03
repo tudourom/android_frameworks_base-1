@@ -3715,6 +3715,12 @@ public final class Settings {
           */
         public static final String SHOW_SU_INDICATOR = "show_su_indicator";
 
+         /**
+          * Whether to show the battery info on the lockscreen while charging
+          * @hide
+          */
+         public static final String LOCKSCREEN_BATTERY_INFO = "lockscreen_battery_info";
+ 
         /**
          * I am the lolrus.
          * <p>
