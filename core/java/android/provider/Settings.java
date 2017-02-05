@@ -3720,7 +3720,7 @@ public final class Settings {
           * @hide
           */
          public static final String LOCKSCREEN_BATTERY_INFO = "lockscreen_battery_info";
- 
+
         /**
          * I am the lolrus.
          * <p>
