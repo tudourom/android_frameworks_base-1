@@ -5474,10 +5474,16 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                 mBrightnessControl = newValue != null && Integer.parseInt(newValue) == 1;
                 break;
             case SHOW_SU_INDICATOR:
-                updateNotifications();
+                UpdateSomeViews();
                 break;
             default:
                 break;
         }
+    }
+    public void UpdateSomeViews() {
+        onDensityOrFontScaleChanged();
+        updateNotifications();
+        updateRowStates();
+        updateSpeedbump();
     }
 }
