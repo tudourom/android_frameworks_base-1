@@ -3728,6 +3728,12 @@ public final class Settings {
          */
         public static final String SHAKE_CLEAN_RECENT = "shake_clean_recent";
 
+          /**
+         * Clean notification by shake
+         * @hide
+         */
+        public static final String SHAKE_CLEAN_NOTIFICATION = "shake_clean_notification";
+
         /**
          * I am the lolrus.
          * <p>

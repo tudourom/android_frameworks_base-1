@@ -146,6 +146,7 @@ import com.android.systemui.classifier.FalsingLog;
 import com.android.systemui.classifier.FalsingManager;
 import com.android.systemui.doze.DozeHost;
 import com.android.systemui.doze.DozeLog;
+import com.android.systemui.doze.ShakeSensorManager;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.qs.QSContainer;
 import com.android.systemui.qs.QSPanel;
@@ -228,7 +229,7 @@ import static android.service.notification.NotificationListenerService.Ranking.i
 
 public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         DragDownHelper.DragDownCallback, ActivityStarter, OnUnlockMethodChangedListener,
-        HeadsUpManager.OnHeadsUpChangedListener, TunerService.Tunable {
+        HeadsUpManager.OnHeadsUpChangedListener, TunerService.Tunable, ShakeSensorManager.ShakeListener {
     static final String TAG = "PhoneStatusBar";
     public static final boolean DEBUG = BaseStatusBar.DEBUG;
     public static final boolean SPEW = false;
@@ -383,6 +384,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     int mPixelFormat;
     Object mQueueLock = new Object();
 
+    private ShakeSensorManager mShakeSensorManager;
+    private Boolean enableShakeCleanByUser;
+
     protected StatusBarIconController mIconController;
 
     // expanded notifications
@@ -467,6 +471,35 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
     private int mNavigationIconHints = 0;
     private HandlerThread mHandlerThread;
+
+    private SettingsObserver mSettingsObserver;
+
+    protected class SettingsObserver extends ContentObserver {
+        SettingsObserver(Handler handler) {
+            super(handler);
+        }
+
+        void observe() {
+           ContentResolver resolver = mContext.getContentResolver();
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.SHAKE_CLEAN_NOTIFICATION),
+                    false, this, UserHandle.USER_ALL);
+            update();
+        }
+
+        @Override
+        public void onChange(boolean selfChange, Uri uri) {
+            super.onChange(selfChange, uri);
+            update();
+        }
+
+        public void update() {
+            ContentResolver resolver = mContext.getContentResolver();
+            enableShakeCleanByUser = Settings.System.getIntForUser(
+                    resolver, Settings.System.SHAKE_CLEAN_NOTIFICATION, 1,
+                    UserHandle.USER_CURRENT) == 1;
+        }
+    }
 
     Runnable mLongPressBrightnessChange = new Runnable() {
         @Override
@@ -822,6 +855,11 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                 STATUS_BAR_BRIGHTNESS_CONTROL,
                 SHOW_SU_INDICATOR);
 
+        if (mSettingsObserver == null) {
+            mSettingsObserver = new SettingsObserver(new Handler());
+        }
+        mSettingsObserver.observe();
+
         // Lastly, call to the icon policy to install/update all the icons.
         mIconPolicy = new PhoneStatusBarPolicy(mContext, mIconController, mCastController,
                 mHotspotController, mUserInfoController, mBluetoothController,
@@ -861,12 +899,26 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                 mContext, mStatusBarView, mKeyguardStatusBar, this);
     }
 
+    @Override
+    public synchronized void onShake() {
+        clearAllNotifications();
+    }
+
+    public void enableShake(boolean enableShakeClean) {
+        if (enableShakeClean && enableShakeCleanByUser && mDeviceInteractive) {
+            mShakeSensorManager.enable(20);
+        } else {
+            mShakeSensorManager.disable();
+        }
+    }
+
     // ================================================================================
     // Constructing the view
     // ================================================================================
     protected PhoneStatusBarView makeStatusBarView() {
         final Context context = mContext;
 
+        mShakeSensorManager = new ShakeSensorManager(mContext, this);
         mScreenWidth = (float) context.getResources().getDisplayMetrics().widthPixels;
         mMinBrightness = context.getResources().getInteger(
                 com.android.internal.R.integer.config_screenBrightnessDim);
@@ -2952,6 +3004,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         }
 
         mExpandedVisible = true;
+        enableShake(true);
 
         // Expand the window to encompass the full screen in anticipation of the drag.
         // This is only possible to do atomically because the status bar is at the top of the screen!
@@ -3089,6 +3142,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         mNotificationPanel.closeQs();
 
         mExpandedVisible = false;
+        enableShake(false);
 
         visibilityChanged(false);
 
@@ -5474,16 +5528,12 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                 mBrightnessControl = newValue != null && Integer.parseInt(newValue) == 1;
                 break;
             case SHOW_SU_INDICATOR:
-                UpdateSomeViews();
+        		updateNotifications();
+        		updateRowStates();
+        		updateSpeedbump();
                 break;
             default:
                 break;
         }
-    }
-    public void UpdateSomeViews() {
-        onDensityOrFontScaleChanged();
-        updateNotifications();
-        updateRowStates();
-        updateSpeedbump();
     }
 }
