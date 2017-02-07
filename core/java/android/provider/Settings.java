@@ -3782,7 +3782,6 @@ public final class Settings {
          */
         public static final String  RECENTS_CLEAR_ALL_LOCATION = "recents_clear_all_location";
 
-
         /**
          * I am the lolrus.
          * <p>
