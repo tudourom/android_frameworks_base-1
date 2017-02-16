@@ -514,9 +514,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                     mNetworkController.onConfigurationChanged();
             }
             if (uri.equals(Settings.Secure.getUriFor(
-                    Settings.Secure.QS_ROWS_PORTRAIT))
-                    || uri.equals(Settings.Secure.getUriFor(
-                    Settings.Secure.QS_ROWS_LANDSCAPE))) {
+                    Settings.Secure.QS_ROWS_PORTRAIT))) {
                     updateResources();
             }
             if (uri.equals(Settings.Secure.getUriFor(
