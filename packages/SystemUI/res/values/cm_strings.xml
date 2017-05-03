@@ -184,5 +184,4 @@
     <!-- [CHAR LIMIT=130] Location detail panel, description for sensors only mode -->
     <string name="quick_settings_location_detail_mode_sensors_only_description">Use GPS to determine your location</string>
 
->>>>>>> ac8641d9e4ce48dfa6abb3231e24653afb3416e0
 </resources>
