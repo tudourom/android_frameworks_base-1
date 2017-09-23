@@ -188,6 +188,7 @@ import com.android.systemui.statusbar.policy.BatteryController.BatteryStateChang
 import com.android.systemui.statusbar.policy.BatteryControllerImpl;
 import com.android.systemui.statusbar.policy.BluetoothControllerImpl;
 import com.android.systemui.statusbar.policy.BrightnessMirrorController;
+import com.android.systemui.statusbar.policy.BurnInProtectionController;
 import com.android.systemui.statusbar.policy.CastControllerImpl;
 import com.android.systemui.statusbar.policy.EncryptionHelper;
 import com.android.systemui.statusbar.policy.FlashlightController;
@@ -324,6 +325,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             "cmsystem:" + CMSettings.System.NAVBAR_LEFT_IN_LANDSCAPE;
     private static final String LOCKSCREEN_MEDIA_METADATA =
             "cmsecure:" + CMSettings.Secure.LOCKSCREEN_MEDIA_METADATA;
+    private static final String SYSTEMUI_BURNIN_PROTECTION =
+            "cmsecure:" + CMSettings.System.SYSTEMUI_BURNIN_PROTECTION;
 
     static {
         boolean onlyCoreApps;
@@ -368,6 +371,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     protected LockscreenWallpaper mLockscreenWallpaper;
     SuControllerImpl mSuController;
     WeatherControllerImpl mWeatherController;
+    private BurnInProtectionController mBurnInProtectionController;
 
     int mNaturalBarHeight = -1;
 
@@ -579,6 +583,10 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             } else {
                 removeNavigationBar();
             }
+            if (mBurnInProtectionController != null) {
+                mBurnInProtectionController.setNavigationBarView(
+                        visible ? mNavigationBarView : null);
+            }
         }
     }
 
@@ -682,6 +690,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     private boolean mScreenOn;
     private boolean mKeyguardShowingMedia;
     private boolean mShowMediaMetadata;
+    private boolean mBurnInProtectionEnabled;
 
     private MediaSessionManager mMediaSessionManager;
     private MediaController mMediaController;
@@ -1005,6 +1014,11 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             mNotificationPanelDebugText = (TextView) mNotificationPanel.findViewById(
                     R.id.header_debug_info);
             mNotificationPanelDebugText.setVisibility(View.VISIBLE);
+        }
+
+        if (mContext.getResources().getBoolean(
+                org.cyanogenmod.platform.internal.R.bool.config_enableBurnInProtection)) {
+            mBurnInProtectionController = new BurnInProtectionController(mContext, mStatusBarView);
         }
 
         try {
@@ -5239,6 +5253,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         mStackScroller.setAnimationsEnabled(false);
         mVisualStabilityManager.setScreenOn(false);
         updateVisibleToUser();
+        if (mBurnInProtectionController != null) {
+            mBurnInProtectionController.stopShiftTimer(mBurnInProtectionEnabled);
+        }
         if (mLaunchCameraOnFinishedGoingToSleep) {
             mLaunchCameraOnFinishedGoingToSleep = false;
 
@@ -5259,6 +5276,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         mVisualStabilityManager.setScreenOn(true);
         mNotificationPanel.setTouchDisabled(false);
         updateVisibleToUser();
+        if (mBurnInProtectionController != null) {
+            mBurnInProtectionController.startShiftTimer(mBurnInProtectionEnabled);
+        }
     }
 
     public void UpdateSomeViews() {
@@ -5676,6 +5696,17 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                 break;
             case LOCKSCREEN_MEDIA_METADATA:
                 mShowMediaMetadata = newValue == null || Integer.parseInt(newValue) == 1;
+                break;
+            case SYSTEMUI_BURNIN_PROTECTION:
+                mBurnInProtectionEnabled = newValue != null && Integer.parseInt(newValue) == 1;
+                if (mBurnInProtectionController != null) {
+                    if (mBurnInProtectionEnabled) {
+                        mBurnInProtectionController.startShiftTimer(true);
+                    } else {
+                        // Forcefully disable it
+                        mBurnInProtectionController.stopShiftTimer(true);
+                    }
+                }
                 break;
             default:
                 break;
