@@ -326,7 +326,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     private static final String LOCKSCREEN_MEDIA_METADATA =
             "cmsecure:" + CMSettings.Secure.LOCKSCREEN_MEDIA_METADATA;
     private static final String SYSTEMUI_BURNIN_PROTECTION =
-            "cmsecure:" + CMSettings.System.SYSTEMUI_BURNIN_PROTECTION;
+            "cmsystem:" + CMSettings.System.SYSTEMUI_BURNIN_PROTECTION;
 
     static {
         boolean onlyCoreApps;
@@ -895,7 +895,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                 SCREEN_BRIGHTNESS_MODE,
                 NAVBAR_LEFT_IN_LANDSCAPE,
                 STATUS_BAR_BRIGHTNESS_CONTROL,
-                LOCKSCREEN_MEDIA_METADATA);
+                LOCKSCREEN_MEDIA_METADATA,
+                SYSTEMUI_BURNIN_PROTECTION);
 
         if (mSettingsObserver == null) {
             mSettingsObserver = new SettingsObserver(new Handler());
